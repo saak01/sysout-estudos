@@ -18,20 +18,29 @@
                     <th>Modelo</th>
                     <th>Ano</th>
                     <th>Cor</th>
-                    <th>Placas</th>
+                    <th>Placa</th>
+                    <th>Opcionais</th>
                     <th>Ações</th>
                 </thead>
 
                 <tbody>
 
                     @foreach ($list as $vehicle)
-                        <tr>
+
+                    @php
+                        $vehicleOptionals = $vehicle -> optionals;
+                        $vehicleOptionalsNames = $vehicleOptionals->pluck('name')->toArray();
+                        $vehicleOptionalsText = implode('; ',$vehicleOptionalsNames);
+                    @endphp
+
+                    <tr>
                             <td>{{ $vehicle->id }}</td>
                             <td>{{ $vehicle->brand_name }}</td>
                             <td>{{ $vehicle->model_name }}</td>
                             <td> {{ $vehicle->model_year }}/{{ $vehicle->year }}</td>
                             <td>{{ $vehicle->color_name }}</td>
                             <td>{{ $vehicle->plate }}</td>
+                            <td>{{ count($vehicleOptionalsNames) > 0 ? $vehicleOptionalsText : 'Não contem' }}</td>
                             <td>
 
                                 <div class="buttons d-flex">

@@ -8,21 +8,20 @@
 @endphp
 
 @if ($success)
-<div class="alert alert-success" role="alert">
+<div class="alert alert-success alert-dismissible fade show" role="alert">
     {{$success}}
 </div>
 @endif
 
-@if ($error)
-<div class="alert alert-danger" role="alert">
-    {{$error}}
-</div>
-@endif
 
 @if (count($errorslist) > 0)
     <ul>
         @foreach ($errorslist as $error)
+        @if ($error)
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
             {{$error}}
+        </div>
+        @endif
         @endforeach
     </ul>
 @endif

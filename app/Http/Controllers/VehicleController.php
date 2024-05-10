@@ -26,6 +26,7 @@ class VehicleController extends Controller
      * @return \Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory
      */
     function index(Request $request){
+
         //Query do banco de dados com a função de escopo Search;
         $query = Vehicle::search($request);
         //Adiquiri o limite da consulta ou deixar o default de 10;
@@ -80,23 +81,27 @@ class VehicleController extends Controller
     }
 
     /**
-     * Formulário update
+     * Update usuários
      *
      * @param Request $request
      * @return void
      */
     function update(Request $request){
-
+        return $this->store($request);
     }
 
     /**
      * Exclusão de veículos
      *
      * @param Request $request
-     * @return void
+     * @return \Illuminate\Http\RedirectResponse
      */
     function delete(Request $request){
-
+        $vehicle = Vehicle::find($request->id);
+        if($request->id && $vehicle){
+            $vehicle->delete();
+            return back()->with('success','O veículo foi removido com sucesso!');
+        }
     }
 
     /**
@@ -123,14 +128,17 @@ class VehicleController extends Controller
 
         return view('pages.vehicle.form',$data);
     }
-
+    /**
+     * Obter validação dos inputs
+     *
+     * @param Request $request
+     * @return \Illuminate\Contracts\Validation\Validator $validator
+     */
     private function validation(Request $request)
     {
-        $uniquePlaceRule = Rule::unique('vehicles','plate');
-
-
+        $uniquePlateRule = Rule::unique('vehicles','plate');
         if($request->id){
-            $uniquePlaceRule->ignore($request->id);
+            $uniquePlateRule->ignore($request->id);
         }
 
         $rules = [
@@ -138,7 +146,7 @@ class VehicleController extends Controller
             'model_year' => ['required', 'integer', 'min:1900'],
             'year' => ['required', 'integer', 'min:1900'],
             'color_id' => ['required', 'integer', 'exists:colors,id'],
-            'plate' => ['required', 'string', 'size:7', $uniquePlaceRule],
+            'plate' => ['required', 'string', 'size:7', $uniquePlateRule],
             'optional_id' => ['nullable','array',] ,
             'optional_id.*' => ['required','integer', 'exists:optionals,id']
         ];
@@ -146,7 +154,7 @@ class VehicleController extends Controller
         $method = $request->method();
 
         if ($method == 'PUT') {
-            $rules['id'] = ['required', 'integer', 'exists:vehicles.id'];
+            $rules['id'] = ['required', 'integer', 'exists:vehicles,id'];
         }
 
         $data = $request->all();
@@ -158,7 +166,6 @@ class VehicleController extends Controller
     }
 
     private function store(Request $request){
-        // dd($request->all());
         $validator = $this->validation($request);
         if($validator -> fails()){
             $error = $validator->errors()->all();
@@ -186,9 +193,7 @@ class VehicleController extends Controller
         $vehicle->year = $request->year;
         $vehicle->color_id = $request->color_id;
         $vehicle->plate = $request->plate;
-
         $vehicle->save();
-
         $vehicle->optionals()->sync($request->optional_id);
     }
 
